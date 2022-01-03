@@ -1,0 +1,112 @@
+{
+    "border": "none",
+    "floating": "auto_off",
+    "layout": "splitv",
+    "marks": [],
+    "percent": 0.5,
+    "type": "con",
+    "nodes": [
+        {
+            "border": "none",
+            "current_border_width": 0,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 540,
+               "width": 960,
+               "x": 0,
+               "y": 540
+            },
+            "marks": [],
+            "name": "Telegram",
+            "percent": 0.5,
+            "swallows": [
+               {
+                "class": "^TelegramDesktop$",
+                "instance": "^telegram\\-desktop$",
+                "machine": "^pahvi$"
+               }
+            ],
+            "type": "con"
+        },
+        {
+            "border": "none",
+            "current_border_width": 0,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 1080,
+               "width": 940,
+               "x": 640,
+               "y": 0
+            },
+            "marks": [],
+            "name": "Konzipt - Discord",
+            "percent": 0.5,
+            "swallows": [
+               {
+                "class": "^discord$",
+                "instance": "^discord$",
+                "machine": "^pahvi$",
+                "window_role": "^browser\\-window$"
+               }
+            ],
+            "type": "con"
+        }
+    ]
+}
+
+{
+    "border": "none",
+    "floating": "auto_off",
+    "layout": "splitv",
+    "marks": [],
+    "percent": 0.5,
+    "type": "con",
+    "nodes": [
+        {
+            "border": "none",
+            "current_border_width": 0,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 540,
+               "width": 960,
+               "x": 960,
+               "y": 0
+            },
+            "marks": [],
+            "name": "3kymppinen - YouTube Music - Brave",
+            "percent": 0.5,
+            "swallows": [
+               {
+                "class": "^Brave\\-browser$",
+                "instance": "^brave\\-browser$",
+                "machine": "^pahvi$",
+                "window_role": "^browser$"
+               }
+            ],
+            "type": "con"
+        },
+        {
+            "border": "none",
+            "current_border_width": 0,
+            "floating": "auto_off",
+            "geometry": {
+               "height": 1080,
+               "width": 960,
+               "x": 0,
+               "y": 0
+            },
+            "marks": [],
+            "name": "ileska@pahvi:~",
+            "percent": 0.5,
+            "swallows": [
+               {
+                "class": "^kitty$",
+                "instance": "^kitty$",
+                "machine": "^pahvi$"
+               }
+            ],
+            "type": "con"
+        }
+    ]
+}
+
