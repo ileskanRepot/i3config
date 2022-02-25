@@ -14,6 +14,8 @@ default_border none
 default_floating_border normal
 
 set $mod Mod4
+set $dmenuBgColor '#000000'
+set $dmenuTextBgColor '#aa00aa'
 #set $mod h
 
 # Use Mouse+$mod to drag floating windows to their wanted position
@@ -32,11 +34,11 @@ font pango:DejaVu Sans Mono 8
 
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
 # screen before suspend. Use loginctl lock-session to lock your screen.
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+# exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
-exec --no-startup-id nm-applet
+# exec --no-startup-id nm-applet
 
 # Use pactl to adjust volume in PulseAudio.
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5% && exec pkill -SIGRTMIN+10 i3blocks
@@ -63,15 +65,13 @@ bindsym $mod+Shift+XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volu
 bindsym $mod+Control+XF86AudioRaiseVolume exec --no-startup-id amixer set Master 100% && exec pkill -SIGRTMIN+10 i3blocks
 bindsym $mod+Control+XF86AudioLowerVolume exec --no-startup-id amixer set Master 0% && exec pkill -SIGRTMIN+10 i3blocks
 
-bindsym $mod+XF86AudioMute exec --no-startup-id amixer set Master toggle && exec pkill -SIGRTMIN+10 i3blocks
-bindsym $mod+XF86AudioMicMute exec --no-startup-id amixer set Capture toggle && exec pkill -SIGRTMIN+12 i3status-rs
+bindsym $mod+XF86AudioMute exec --no-startup-id amixer set -D pulse Master toggle && exec pkill -SIGRTMIN+10 i3blocks
+bindsym $mod+XF86AudioMicMute exec --no-startup-id amixer -D pulse set Capture toggle && exec pkill -SIGRTMIN+12 i3status-rs
 
 #bindsym $mod+XF86MonBrightnessDown exec --no-startup-id exec pkill -SIGRTMIN+12 i3blocks
 #bindsym $mod+XF86MonBrightnessUp exec --no-startup-id exec pkill -SIGRTMIN+12 i3blocks
 
-
-
-
+#bindsym XF86WakeUp bind fn button  
 # audio controlls
 bindsym XF86Tools exec --no-startup-id playerctl previous && exec pkill -SIGRTMIN+13 i3blocks
 bindsym XF86Bluetooth exec --no-startup-id playerctl play-pause && exec pkill -SIGRTMIN+13 i3blocks
@@ -96,20 +96,21 @@ bindsym $mod+Shift+XF86MonBrightnessDown exec --no-startup-id echo $(($(cat /sys
 
 
 # start a terminal
-bindsym $mod+BackSpace exec kitty
+#bindsym $mod+BackSpace exec kitty
+bindsym $mod+BackSpace exec ~/projects/suckless/st/st
 #bindsym $mod+Return exec ~/projects/suckless/st/st
 
 # kill focused window
 bindsym Mod1+F4 kill
 
 # start dmenu (a program launcher)
-bindcode $mod+39 exec --no-startup-id ~/projects/suckless/dmenu/dmenu_run -sb '#aa00aa' -nb '#000000'
+bindcode $mod+39 exec --no-startup-id ~/projects/suckless/dmenu/dmenu_run -sb $dmenuTextBgColor -nb $dmenuBgColor
 
 # A more modern dmenu replacement is rofi:
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
 # There also is i3-dmenu-desktop which only displays applications shipping a
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
-# bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
+bindcode $mod+40 exec --no-startup-id ~/scripts/downloadCurrentMpvSong.sh
 
 # change focus
 bindcode $mod+43 focus left
@@ -156,7 +157,7 @@ bindsym $mod+Shift+space floating toggle
 #bindsym $mod+space focus mode_toggle
 
 # focus the parent container
-bindsym $mod+38 focus parent
+bindcode $mod+38 focus parent
 
 # focus the child container
 #bindsym $mod+d focus child
@@ -240,7 +241,13 @@ bindcode $mod+Control+Shift+19 move container to workspace number $ws20
 
 bindcode $mod+Shift+20 move container to workspace $wsDcTg
 
+bindcode $mod+mod1+27 exec --no-startup-id i3-msg "rename workspace to $(echo -e "1\n2\n3\n4\n5\n6\n7\n8\n9\n10" | dmenu -p \"rename ws\" -sb $dmenuTextBgColor -nb $dmenuBgColor)"
+bindcode $mod+Control+27 exec --no-startup-id i3-msg "workspace $(i3-msg -t get_workspaces | jq -r ".[].name" | sort -V |dmenu -p \"goto ws\" -sb $dmenuTextBgColor -nb $dmenuBgColor)"
+#bindcode $mod+mod1+27 exec --no-startup-id notify-send moi
+
 workspace $wsDcTg output eDP1
+
+bindsym $mod+Tab workspace back_and_forth
 
 bindsym $mod+Control+Left move workspace to output left
 bindsym $mod+Control+Down move workspace to output down
@@ -259,9 +266,10 @@ bindcode $mod+Shift+39 restart
 bindcode $mod+Shift+26 exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # class                 border  bground text    indicator child_border
-client.focused          #100010 #CC00CC #FFFFFF #2E9EF4   #285577
-client.focused_inactive #000000 #990099 #FFFFFF #484E50   #5F676A
-client.unfocused        #000000 #330033 #888888 #292D2E   #222222
+client.focused          #f000f0 #CC00CC #FFFFFF #2E9EF4   #ff00ff
+client.focused_inactive #000000 #990099 #FFFFFF #484E50   #900090
+client.unfocused        #000000 #330033 #888888 #292D2E   #900090
+client.urgent		        #000000 #330033 #888888 #292D2E   #900090
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -290,8 +298,9 @@ mode "resize" {
 bindcode $mod+47 mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
-# finds out, if available)
+
 bar {
+#	i3bar_command 		i3bar -t
 	status_command		i3blocks
 	font							pango:FontAwesome 8
 #	font pango:Font Awesome 5 Brands Regular, Font Awesome 5 Brands Regular,Font Awesome 5 Free Solid 
@@ -301,7 +310,9 @@ bar {
 	workspace_buttons	yes
 #	output						primary
 	colors {
-		background 			#000000
+		background 				#000000 # 00
+		statusline			 	#ffff00
+		separator 				#ffffff
 
 		focused_workspace	#ffffff #8000a0
 		active_workspace	#ffffff #333333
@@ -312,6 +323,7 @@ bar {
 
 
 #new_window none
+#force_focus_wrapping yes
 #hide_edge_borders both
 
 
@@ -361,8 +373,9 @@ bindcode $mod+81 exec --no-startup-id "xdotool click 3"
 
 #bindsym $mod+Return exec --no-startup-id "changKeyboard"
 
-bindsym XF86Calculator exec --no-startup-id "xclip -selection c -o | sed 's/bar//g' | sed 's/cdot/\*/g' | sed 's/over/\//g' | sed 's/{/(/g' | sed 's/%pi/π/g' |sed 's/}/\)/g' | qalc -t -s 'angle 0' -s 'angle degrees' -s 'color false' -s 'decimal comma on' | grep -Pe '  .+' | xargs | tr -d '\n' | sed 's,\x1B\[[0-9;]*[a-zA-Z],,g'| xclip -selection c -i"
-
+# bindsym XF86Calculator exec --no-startup-id "xclip -selection c -o | sed 's/bar//g' | sed 's/cdot/\*/g' | sed 's/over/\//g' | sed 's/{/(/g' | sed 's/%pi/π/g' |sed 's/}/\)/g' | qalc -t -s 'angle 0' -s 'angle degrees' -s 'color false' -s 'decimal comma on' | grep -Pe '  .+' | xargs | tr -d '\n' | sed 's,\x1B\[[0-9;]*[a-zA-Z],,g'| xclip -selection c -i"
+bindsym XF86Calculator exec --no-startup-id "$HOME/scripts/clipqalc.sh"
+bindcode $mod+135 exec --no-startup-id "$HOME/scripts/clipqalc.sh"
 bindsym $mod+Control+space exec --no-startup-id "$HOME/projects/spaceRemover/remover.sh"
 
 bindsym XF86PowerOff exec --no-startup-id "i3lock --inside-color=00000000 --ring-color=00000000 --insidever-color=00000000 --ringver-color=00000000 --insidewrong-color=00000000 --ringwrong-color=00000000 --line-color=00000000 --keyhl-color=00000000 --bshl-color=00000000 --separator-color=00000000 verif-color=00000000 wrong-color=00000000 --layout-color=00000000 --time-color=00000000 --date-color=00000000 --greeter-color=00000000 00 --date-color=00000000 --greeter-color=00000000 timeoutline-color=00000000 dateoutline-color=00000000 layoutoutline-color=00000000 verifoutline-color=00000000 wrongoutline-color=00000000 greeteroutline-color=00000000 --verif-color=00000000 --wrong-color=00000000 -i ~/pictures/BlueScreen.png"
@@ -401,9 +414,69 @@ bindcode --release Mod1+Control+55 exec --no-startup-id ~/.config/i3/forcePaste.
 
 bindcode $mod+Shift+32 fullscreen disable; floating enable; resize set 480 270; sticky enable; move window to position 0 0
 
-bindcode $mod+27 exec mpv "$(xclip -o)" --really-quiet
+bindcode $mod+27 exec --no-startup-id ~/scripts/getYtVideoTitle.sh $(xclip -o) && exec mpv "$(xclip -o)" --really-quiet
 bindcode $mod+Shift+27 exec kitty mpv --hwdec=auto --ytdl-format=best --ytdl-raw-options=yes-playlist= -fs --no-video "$(xclip -o)"
-
 
 bindcode $mod+Control+40 exec --no-startup-id ~/.config/i3/lauchDcTgWorkspace.sh
 bindcode $mod+53 [urgent=latest] focus
+
+
+#bindcode $mod+38 exec --no-startup-id "xdotool click 1"
+
+mode "Mouse" {
+	# These bindings trigger as soon as you enter the resize mode
+	# Pressing left will shrink the window’s width.
+	# Pressing right will grow the window’s width.
+	# Pressing up will shrink the window’s height.
+	# Pressing down will grow the window’s height.
+
+	bindcode 44 exec --no-startup-id "xdotool mousemove_relative -- 0 5"
+
+	bindcode 45 exec --no-startup-id "xdotool mousemove_relative -- 0 -5"
+
+	bindcode 43 exec --no-startup-id "xdotool mousemove_relative -- -5 0"
+
+	bindcode 46 exec --no-startup-id "xdotool mousemove_relative -- 5 0"
+
+	bindcode Control+44 exec --no-startup-id "xdotool mousemove_relative -- 0 20"
+
+	bindcode Control+45 exec --no-startup-id "xdotool mousemove_relative -- 0 -20"
+
+	bindcode Control+43 exec --no-startup-id "xdotool mousemove_relative -- -20 0"
+
+	bindcode Control+46 exec --no-startup-id "xdotool mousemove_relative -- 20 0"
+
+	bindcode Shift+44 exec --no-startup-id "xdotool mousemove_relative -- 0 1"
+
+	bindcode Shift+45 exec --no-startup-id "xdotool mousemove_relative -- 0 -1"
+
+	bindcode Shift+43 exec --no-startup-id "xdotool mousemove_relative -- -1 0"
+
+	bindcode Shift+46 exec --no-startup-id "xdotool mousemove_relative -- 1 0"
+
+	bindcode 38 exec --no-startup-id "xdotool click 1"
+
+	bindcode 39 exec --no-startup-id "xdotool click 2"
+
+	bindcode 40 exec --no-startup-id "xdotool click 3"
+
+	bindcode Mod1+38 exec --no-startup-id "[ $(~/projects/git/motsgar/is-key-pressed/isPressed Button1) = 0 ] && xdotool mousedown 1 || xdotool mouseup 1"
+
+	bindcode 58 exec --no-startup-id "xdotool mousemove $(i3-input -P '<X> <Y>: '| grep command | cut -d\  -f 3,4) || notify-send 'Mouse Pos' 'Wrond Format'"
+
+	bindcode 36 mode "default"
+	bindcode 9 mode "default"
+}
+
+bindcode $mod+58 mode "Mouse"
+
+mode "Lock" {
+	bindcode 36 exec --no-startup-id i3-msg "mode \"default\"" && exec --no-startup-id ~/.local/bin/i3lockCustomRgb
+	#bindcode 9 exec --no-startup-id ~/.local/bin/i3lockCustomRgb && exec --no-startup-id i3-msg "mode \"default\"" 
+	bindcode 9 exec "i3-nagbar -t warning -m 'You pressed the lock shortcut. Lock computer?' -B 'Yes, lock i3' 'i3-msg mode default'"
+}
+
+bindcode $mod+mod1+Control+46 mode "Lock"
+
+bindcode $mod+Shift+54 exec --no-startup-id '/usr/local/bin/grabColor'
+bindcode Shift+94 exec --no-startup-id "sleep 0.2;xdotool type '-'"
