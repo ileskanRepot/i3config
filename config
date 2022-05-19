@@ -13,7 +13,10 @@
 default_border none
 default_floating_border normal
 
+
+
 set $mod Mod4
+set $altGr Mod5
 set $dmenuBgColor '#000000'
 set $dmenuTextBgColor '#aa00aa'
 #set $mod h
@@ -51,7 +54,7 @@ bindsym Control+XF86AudioRaiseVolume exec --no-startup-id amixer set Master 100%
 bindsym Control+XF86AudioLowerVolume exec --no-startup-id amixer set Master 0% && exec pkill -SIGRTMIN+10 i3blocks
 
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle && exec pkill -SIGRTMIN+10 i3blocks
-bindsym XF86AudioMicMute exec --no-startup-id amixer set Capture toggle && exec pkill -SIGRTMIN+12 i3status-rs
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute 0 toggle && exec pkill -SIGRTMIN+12 i3status-rs
 
 #bindsym XF86MonBrightnessDown exec --no-startup-id exec pkill -SIGRTMIN+12 i3blocks
 #bindsym XF86MonBrightnessUp exec --no-startup-id exec pkill -SIGRTMIN+12 i3blocks
@@ -77,6 +80,10 @@ bindsym XF86Tools exec --no-startup-id playerctl previous && exec pkill -SIGRTMI
 bindsym XF86Bluetooth exec --no-startup-id playerctl play-pause && exec pkill -SIGRTMIN+13 i3blocks
 bindsym XF86Favorites exec --no-startup-id playerctl next && exec pkill -SIGRTMIN+13 i3blocks
 
+bindsym Shift+XF86Tools exec --no-startup-id playerctl -p $(playerctl -l | ~/projects/suckless/dmenu/dmenu -p "Previous" -sb $dmenuTextBgColor -nb $dmenuBgColor) previous && exec pkill -SIGRTMIN+13 i3block
+bindsym Shift+XF86Bluetooth exec --no-startup-id playerctl -p $(playerctl -l | ~/projects/suckless/dmenu/dmenu -p "Play/Pause" -sb $dmenuTextBgColor -nb $dmenuBgColor) play-pause && exec pkill -SIGRTMIN+13 i3block
+bindsym Shift+XF86Favorites exec --no-startup-id playerctl -p $(playerctl -l | ~/projects/suckless/dmenu/dmenu -p "Next" -sb $dmenuTextBgColor -nb $dmenuBgColor) next && exec pkill -SIGRTMIN+13 i3blocks
+
 bindsym XF86AudioPrev exec --no-startup-id playerctl previous && exec pkill -SIGRTMIN+13 i3blocks
 bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause && exec pkill -SIGRTMIN+13 i3blocks
 bindsym XF86AudioNext exec --no-startup-id playerctl next && exec pkill -SIGRTMIN+13 i3blocks
@@ -93,6 +100,9 @@ bindsym $mod+Shift+XF86MonBrightnessUp exec --no-startup-id echo $(($(cat /sys/c
 bindsym $mod+XF86MonBrightnessUp exec --no-startup-id echo $(($(cat /sys/class/backlight/intel_backlight/actual_brightness)*2)) > /sys/class/backlight/intel_backlight/brightness && exec pkill -SIGRTMIN+12 i3blocks
 bindsym $mod+XF86MonBrightnessDown exec --no-startup-id echo $(($(cat /sys/class/backlight/intel_backlight/actual_brightness)/2)) > /sys/class/backlight/intel_backlight/brightness && exec pkill -SIGRTMIN+12 i3blocks
 bindsym $mod+Shift+XF86MonBrightnessDown exec --no-startup-id echo $(($(cat /sys/class/backlight/intel_backlight/actual_brightness)-1)) > /sys/class/backlight/intel_backlight/brightness && exec pkill -SIGRTMIN+12 i3blocks
+
+bindsym Control+XF86MonBrightnessDown exec --no-startup-id ~/.config/i3/brExact.sh -sb $dmenuTextBgColor -nb $dmenuBgColor && exec pkill -SIGRTMIN+12 i3blocks
+bindsym Control+XF86MonBrightnessUp exec --no-startup-id ~/.config/i3/brExact.sh -sb $dmenuTextBgColor -nb $dmenuBgColor && exec pkill -SIGRTMIN+12 i3blocks
 
 
 # start a terminal
@@ -111,6 +121,9 @@ bindcode $mod+39 exec --no-startup-id ~/projects/suckless/dmenu/dmenu_run -sb $d
 # There also is i3-dmenu-desktop which only displays applications shipping a
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 bindcode $mod+40 exec --no-startup-id ~/scripts/downloadCurrentMpvSong.sh
+bindcode $mod+Shift+40 exec --no-startup-id ~/scripts/downloadCurrentMpvSongMusicOrLyrics.sh $dmenuTextBgColor $dmenuBgColor	
+bindcode $mod+33 exec --no-startup-id ~/scripts/displayPlayingMpv.sh
+
 
 # change focus
 bindcode $mod+43 focus left
@@ -248,6 +261,7 @@ bindcode $mod+Control+27 exec --no-startup-id i3-msg "workspace $(i3-msg -t get_
 workspace $wsDcTg output eDP1
 
 bindsym $mod+Tab workspace back_and_forth
+bindsym mod1+Tab exec --no-startup-id i3-msg "workspace $(i3-msg -t get_workspaces | jq -r ".[].name" | sort -V |dmenu -p \"goto ws\" -sb $dmenuTextBgColor -nb $dmenuBgColor)"
 
 bindsym $mod+Control+Left move workspace to output left
 bindsym $mod+Control+Down move workspace to output down
@@ -293,6 +307,7 @@ mode "resize" {
         # back to normal: Enter or Escape or $mod+r
         bindcode 36 mode "default"
         bindcode 9 mode "default"
+				bindcode 94 mode "default"
 }
 
 bindcode $mod+47 mode "resize"
@@ -300,7 +315,7 @@ bindcode $mod+47 mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 
 bar {
-#	i3bar_command 		i3bar -t
+	i3bar_command 		i3bar -t
 	status_command		i3blocks
 	font							pango:FontAwesome 8
 #	font pango:Font Awesome 5 Brands Regular, Font Awesome 5 Brands Regular,Font Awesome 5 Free Solid 
@@ -310,7 +325,7 @@ bar {
 	workspace_buttons	yes
 #	output						primary
 	colors {
-		background 				#000000 # 00
+		background 				#000000 # 90
 		statusline			 	#ffff00
 		separator 				#ffffff
 
@@ -329,9 +344,10 @@ bar {
 
 bindcode $mod+42 exec discord
 
-bindcode $mod+24 exec "firefox-developer-edition --private-window; [ $(($RANDOM%10)) -eq 0 ] && sleep 0.5 && firefox-developer-edition --private-window www.bbc.com/news"
+bindcode $mod+24 exec "librewolf"
 
-bindcode $mod+Shift+24 exec firefox-developer-edition 
+bindcode $mod+Shift+24 exec librewolf --private-window
+bindcode $mod+Control+24 exec ~/projects/suckless/st/st links duckduckgo.com 
 
 #bindsym $mod+Shift+t exec --no-startup-id pkill telegram
 
@@ -343,34 +359,6 @@ bindcode Shift+107 exec --no-startup-id "maim -s | xclip -t 'image/png' -selecti
 bindcode $mod+107 exec --no-startup-id "maim -so ~/pictures/screenshots/$(date +%F-%X:%N).png"
 bindcode $mod+Shift+107 exec --no-startup-id "sshot=$(mktemp --suffix='.png'); xclip -selection c -o > $sshot; if [ -n $(file $sshot --mime-type | grep -o 'image/png') ]; then gimp $sshot; cat $sshot | xclip -selection c -i -t image/png; fi; rm $sshot"
 
-bindcode $mod+88 exec --no-startup-id "xdotool mousemove_relative -- 0 5"
-
-bindcode $mod+80 exec --no-startup-id "xdotool mousemove_relative -- 0 -5"
-
-bindcode $mod+83 exec --no-startup-id "xdotool mousemove_relative -- -5 0"
-
-bindcode $mod+85 exec --no-startup-id "xdotool mousemove_relative -- 5 0"
-
-bindcode $mod+Control+88 exec --no-startup-id "xdotool mousemove_relative -- 0 20"
-
-bindcode $mod+Control+80 exec --no-startup-id "xdotool mousemove_relative -- 0 -20"
-
-bindcode $mod+Control+83 exec --no-startup-id "xdotool mousemove_relative -- -20 0"
-
-bindcode $mod+Control+85 exec --no-startup-id "xdotool mousemove_relative -- 20 0"
-
-bindcode $mod+Shift+88 exec --no-startup-id "xdotool mousemove_relative -- 0 1"
-
-bindcode $mod+Shift+79 exec --no-startup-id "xdotool mousemove_relative -- 0 -1"
-
-bindcode $mod+Shift+83 exec --no-startup-id "xdotool mousemove_relative -- -1 0"
-
-bindcode $mod+Shift+85 exec --no-startup-id "xdotool mousemove_relative -- 1 0"
-
-bindcode $mod+79 exec --no-startup-id "xdotool click 1"
-
-bindcode $mod+81 exec --no-startup-id "xdotool click 3"
-
 #bindsym $mod+Return exec --no-startup-id "changKeyboard"
 
 # bindsym XF86Calculator exec --no-startup-id "xclip -selection c -o | sed 's/bar//g' | sed 's/cdot/\*/g' | sed 's/over/\//g' | sed 's/{/(/g' | sed 's/%pi/π/g' |sed 's/}/\)/g' | qalc -t -s 'angle 0' -s 'angle degrees' -s 'color false' -s 'decimal comma on' | grep -Pe '  .+' | xargs | tr -d '\n' | sed 's,\x1B\[[0-9;]*[a-zA-Z],,g'| xclip -selection c -i"
@@ -378,26 +366,17 @@ bindsym XF86Calculator exec --no-startup-id "$HOME/scripts/clipqalc.sh"
 bindcode $mod+135 exec --no-startup-id "$HOME/scripts/clipqalc.sh"
 bindsym $mod+Control+space exec --no-startup-id "$HOME/projects/spaceRemover/remover.sh"
 
-bindsym XF86PowerOff exec --no-startup-id "i3lock --inside-color=00000000 --ring-color=00000000 --insidever-color=00000000 --ringver-color=00000000 --insidewrong-color=00000000 --ringwrong-color=00000000 --line-color=00000000 --keyhl-color=00000000 --bshl-color=00000000 --separator-color=00000000 verif-color=00000000 wrong-color=00000000 --layout-color=00000000 --time-color=00000000 --date-color=00000000 --greeter-color=00000000 00 --date-color=00000000 --greeter-color=00000000 timeoutline-color=00000000 dateoutline-color=00000000 layoutoutline-color=00000000 verifoutline-color=00000000 wrongoutline-color=00000000 greeteroutline-color=00000000 --verif-color=00000000 --wrong-color=00000000 -i ~/pictures/BlueScreen.png"
-
 bindsym $mod+XF86PowerOff exec --no-startup-id "[ $(echo $(free -b | awk 'NR==3 {print $4}')'-'$(cat /sys/power/image_size) | bc) -gt 0 ] && notify-send hibernate pystyy && loginctl hibernate || notify-send hibernate 'ei pysty'"
 
 bindsym $mod+ctrl+XF86PowerOff exec --no-startup-id shutdown 0
 
-#bindsym XF86Sleep exec --no-startup-id "[ $(ps aux|grep i3lock|wc -l) -le 4 ] && lock1 & sleep 1;loginctl suspend-then-hibernate"
-
-#bindsym $mod+Control+BackSpace exec --no-startup-id "imlib2_grab ~/pictures/screenshot.png; i3lock -i ~/pictures/screenshot.png --inside-color=00000000 --ring-color=00000000 --insidever-color=00000000 --ringver-color=00000000 --insidewrong-color=00000000 --ringwrong-color=00000000 --line-color=00000000 --keyhl-color=00000000 --bshl-color=00000000 --separator-color=00000000 verif-color=00000000 wrong-color=00000000 --layout-color=00000000 --time-color=00000000 --date-color=00000000 --greeter-color=00000000 00 --date-color=00000000 --greeter-color=00000000 timeoutline-color=00000000 dateoutline-color=00000000 layoutoutline-color=00000000 verifoutline-color=00000000 wrongoutline-color=00000000 greeteroutline-color=00000000 --verif-color=00000000 --wrong-color=00000000"
-
-#bindsym $mod+Shift+BackSpace exec --no-startup-id "imlib2_grab ~/pictures/screenshot.png; convert ~/pictures/screenshot.png -crop 1920x1061+0+19 ~/pictures/screenshot.png; convert ~/pictures/screenshot.png -resize 1920x1080! ~/pictures/screenshot.png; convert ~/pictures/screenshot.png -blur 0x8 ~/pictures/screenshot.png; i3lock -i ~/pictures/screenshot.png -k --time-color=a000f0 --keyhl-color=ffffff --inside-color=000000a0 --date-color=a000f0 --ring-color=a000f0"
-
-exec --no-startup-id ~/.fehbg
+exec_always --no-startup-id ~/.fehbg
+bindcode $mod+54 exec --no-startup-id "xclip -selection clipboard -t 'image/png' -o | feh - -."
 
 exec --no-startup-id "flameshot"
 
 exec --no-startup-id "xset r rate 350 50"
 
-#exec_always --no-startup-id "pkill dunst"
-#exec_always --no-startup-id "/usr/bin/dunst"
 
 #exec --no-startup-id "pkill dunst"
 exec --no-startup-id dunst
@@ -407,29 +386,26 @@ bindsym Ctrl+Shift+space exec --no-startup-id dunstctl close-all
 
 bindsym $mod+space exec --no-startup-id "setxkbmap us colemak"
 
-bindcode --release Mod1+Control+55 exec --no-startup-id ~/.config/i3/forcePaste.sh
+bindcode --release $mod+Control+55 exec --no-startup-id ~/.config/i3/forcePaste.sh
+bindcode --release $mod+Mod1+55 exec --no-startup-id ~/.config/i3/forcePaste2.sh
 
 #gaps inner 10
 #gaps outer 2
 
 bindcode $mod+Shift+32 fullscreen disable; floating enable; resize set 480 270; sticky enable; move window to position 0 0
 
-bindcode $mod+27 exec --no-startup-id ~/scripts/getYtVideoTitle.sh $(xclip -o) && exec mpv "$(xclip -o)" --really-quiet
-bindcode $mod+Shift+27 exec kitty mpv --hwdec=auto --ytdl-format=best --ytdl-raw-options=yes-playlist= -fs --no-video "$(xclip -o)"
+bindcode $mod+27 exec --no-startup-id ~/scripts/getYtVideoTitle.sh $(xclip -o) && exec mpv --input-ipc-server=/tmp/mpvsocket --hwdec=auto "$(xclip -o)" --really-quiet
+bindcode $mod+Shift+27 exec kitty mpv --input-ipc-server=/tmp/mpvsocket --hwdec=auto --ytdl-format=best --ytdl-raw-options=yes-playlist= -fs --no-video "$(xclip -o)"
 
 bindcode $mod+Control+40 exec --no-startup-id ~/.config/i3/lauchDcTgWorkspace.sh
 bindcode $mod+53 [urgent=latest] focus
 
+# Remove Telegram urgency without focusing
+bindcode $mod+52 exec --no-startup-id "wmctrl -c Telegram -b remove,demands_attention"
 
 #bindcode $mod+38 exec --no-startup-id "xdotool click 1"
 
 mode "Mouse" {
-	# These bindings trigger as soon as you enter the resize mode
-	# Pressing left will shrink the window’s width.
-	# Pressing right will grow the window’s width.
-	# Pressing up will shrink the window’s height.
-	# Pressing down will grow the window’s height.
-
 	bindcode 44 exec --no-startup-id "xdotool mousemove_relative -- 0 5"
 
 	bindcode 45 exec --no-startup-id "xdotool mousemove_relative -- 0 -5"
@@ -466,6 +442,7 @@ mode "Mouse" {
 
 	bindcode 36 mode "default"
 	bindcode 9 mode "default"
+	bindcode 94 mode "default"
 }
 
 bindcode $mod+58 mode "Mouse"
@@ -480,3 +457,5 @@ bindcode $mod+mod1+Control+46 mode "Lock"
 
 bindcode $mod+Shift+54 exec --no-startup-id '/usr/local/bin/grabColor'
 bindcode Shift+94 exec --no-startup-id "sleep 0.2;xdotool type '-'"
+
+bindcode 107+44 exec --no-startup-id "notify-send 'moi'"
